@@ -78,6 +78,7 @@ if __name__ == '__main__':
         # For example, load the city distance matrix from CSV.
         distance_matrix = np.loadtxt("city_distances.csv", delimiter=",")
         num_nodes = distance_matrix.shape[0]
+        print(num_nodes)
         # Generate an initial population of candidate routes.
         population = gaf.generate_unique_population(population_size=100, num_nodes=num_nodes)
         # Uncomment the following to test a multi-vehicle extension (e.g., with 2 vehicles).
