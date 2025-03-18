@@ -46,8 +46,8 @@ def select_in_tournament(population,
         - list: A list of selected individuals for crossover.
     """
     selected = []
-    
     n_individuals = len(population)
+
     for _ in range(number_tournaments):
         # Randomly select tournament_size individuals (without replacement)
         idx = np.random.choice(n_individuals, size=tournament_size, replace=False)

@@ -14,24 +14,64 @@ def parallel_fitness_evaluation(population, distance_matrix):
     """
     n = len(population)
     # Determine each process's share of the population.
-    chunk_size = n // size
+    chunk_size = (n+size-1) // size
     start = rank * chunk_size
     # Ensure the last process takes any remainder.
-    end = n if rank == size - 1 else start + chunk_size
+    end = min(start + chunk_size, n)
     local_population = population[start:end]
     
-    # Compute local fitness values.
-    local_fitness = [gaf.calculate_fitness(route, distance_matrix) for route in local_population]
+    # Compute local fitness using the GA's fitness function.
+    local_fitness = np.empty(chunk_size, dtype=np.float64)
+    for i, route in enumerate(local_population):
+        local_fitness[i] = gaf.calculate_fitness(route, distance_matrix)
     
-    # Gather all local fitness results at the root process.
-    all_fitness = comm.gather(local_fitness, root=0)
+    # # Compute local fitness values.
+    # local_fitness = [gaf.calculate_fitness(route, distance_matrix) for route in local_population]
+    
+     #Prepare a receive buffer on the root process.
+    recvbuf = None
+    if rank == 0:
+        recvbuf = np.empty(n, dtype=np.float64)
+
+    # Nonblocking gather of fitness values.
+    req = comm.Igather(local_fitness, recvbuf, root=0)
+    req.Wait()  # Wait for the gather to complete.
+
+
+    # # Gather all local fitness results at the root process.
+    # all_fitness = comm.gather(local_fitness, root=0)
     
     if rank == 0:
-        # Flatten the list of lists.
-        fitness = [f for sublist in all_fitness for f in sublist]
-        return fitness
+        return recvbuf.tolist()
     else:
         return None
+
+    # if rank == 0:
+    #     # Flatten the list of lists.
+    #     fitness = [f for sublist in all_fitness for f in sublist]
+    #     return fitness
+    # else:
+    #     return None
+
+def assign_routes_to_vehicles(population, num_vehicles):
+    """
+    (Optional Improvement) Naively partitions each route among multiple vehicles.
+    
+    For each route, divide the route into 'num_vehicles' segments.
+    This is a simple stub—you would need to adjust both the representation
+    and the fitness evaluation to truly support multiple vehicles.
+    """
+    vehicle_routes = []
+    for route in population:
+        n = len(route)
+        segment_length = n // num_vehicles
+        segments = [route[i*segment_length:(i+1)*segment_length] for i in range(num_vehicles)]
+        # Append any remaining nodes to the last vehicle's route.
+        if n % num_vehicles:
+            segments[-1].extend(route[num_vehicles*segment_length:])
+        vehicle_routes.append(segments)
+    return vehicle_routes
+
 
 if __name__ == '__main__':
     if rank == 0:
@@ -40,6 +80,10 @@ if __name__ == '__main__':
         num_nodes = distance_matrix.shape[0]
         # Generate an initial population of candidate routes.
         population = gaf.generate_unique_population(population_size=100, num_nodes=num_nodes)
+        # Uncomment the following to test a multi-vehicle extension (e.g., with 2 vehicles).
+        # num_vehicles = 2
+        # multi_vehicle_population = assign_routes_to_vehicles(population, num_vehicles)
+
         start_time = time.time()
     else:
         population = None
@@ -57,3 +101,7 @@ if __name__ == '__main__':
         end_time = time.time()
         print("Parallel fitness evaluation took:", end_time - start_time, "seconds")
         print("Fitness values:", fitness)
+
+
+# I chosen to parallelize fitness evaluation because it is the most compute-intensive and “embarrassingly parallel” portion of the algorithm.
+
