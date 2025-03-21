@@ -1,0 +1,142 @@
+# 🧬 Parallel Genetic Algorithm for TSP with MPI
+
+This project implements a **Genetic Algorithm (GA)** to solve the **Traveling Salesman Problem (TSP)** using **MPI (Message Passing Interface)** for distributed fitness evaluation. The algorithm finds the shortest route visiting all cities exactly once and returning to the origin.
+
+---
+
+## 📦 Files Included
+
+- `genetic_algorithm_mpi.py` – Main MPI program that runs the genetic algorithm.
+- `genetic_algorithms_functions.py` – All helper functions: fitness, repair, heuristic, crossover, mutation, etc.
+- `city_distances_extended.csv` – Distance matrix for 100 cities (100x100).
+- `city_distances_updated.csv` – Distance matrix for 32 cities (32x32).
+- `best_route.txt` – Output file storing the best route and its distance.
+
+---
+
+## 🚀 How It Works
+
+### ✅ Features
+
+- **Parallel fitness evaluation** using `mpi4py`
+- **Heuristic-based route generation**
+- **Route repair** to fix infeasible paths (disconnected nodes)
+- **Tournament selection**
+- **Order Crossover (OX1)**
+- **Swap mutation**
+- **Penalty mechanism** for invalid routes (`distance == 100000`)
+- **Automatic matrix fixing** for non-square CSV files
+
+---
+
+## ⚙️ Requirements
+
+- Python 3.6+
+- `mpi4py` package
+- `numpy`
+- `pandas`
+
+To install dependencies:
+
+```bash
+pip install mpi4py numpy pandas
+```
+
+---
+
+## 🧪 Running the Code
+
+### Run with 4 processes:
+
+```bash
+mpiexec -n 4 python genetic_algorithm_mpi.py
+```
+
+This will:
+1. Load the distance matrix.
+2. Generate a unique population.
+3. Distribute it across processes.
+4. Run parallel fitness evaluation.
+5. Output the best route found.
+
+---
+
+## 📈 Sample Output
+
+```
+📌 Rank 0 started execution
+📌 Distance Matrix Shape: (100, 100), Nodes: 100
+🔍 Rank 0: Attempting to generate 500 individuals...
+✅ Population split into 4 chunks
+🔍 Rank 1: Processing 125 individuals
+🔍 Rank 2: Processing 125 individuals
+🔍 Rank 3: Processing 125 individuals
+✅ Parallel fitness evaluation completed in 0.0089 seconds
+🏁 Best Distance: 571.0
+```
+
+Check `best_route.txt` for the best route and total distance.
+
+---
+
+## 📁 Example: best_route.txt
+
+```
+Best Route: [0, 2, 7, 15, ..., 0]
+Best Distance: 571.0
+```
+
+---
+
+## 🛠️ Notes
+
+- Infeasible routes (with disconnections) are penalized with a large negative fitness.
+- The code supports large matrices but ensures they are square before processing.
+- The system is tested on matrices of size 32x32 and 100x100.
+
+---
+
+
+See the diffrent speed with n = 1,2,3 and 4 Using city_distances_extended.csv 
+
+mpiexec -n 1 python genetic_algorithm_mpi.py
+
+✅ Parallel fitness evaluation completed in 0.0144 seconds
+🔍 Sample Fitness Values: [np.float64(-915.0), -1000000.0, np.float64(-713.0), np.float64(-1087.0), np.float64(-962.0), np.float64(-949.0), -1000000.0, np.float64(-804.0), np.float64(-890.0), np.float64(-919.0)]
+🏁 Best Distance: 611.0
+
+
+mpiexec -n 2 python genetic_algorithm_mpi.py
+
+✅ Parallel fitness evaluation completed in 0.0085 seconds
+🔍 Sample Fitness Values: [np.float64(-850.0), np.float64(-832.0), -1000000.0, np.float64(-950.0), -1000000.0, np.float64(-944.0), np.float64(-983.0), np.float64(-819.0), np.float64(-980.0), np.float64(-894.0)]
+🏁 Best Distance: 632.0
+
+mpiexec -n 3 python genetic_algorithm_mpi.py
+
+✅ Parallel fitness evaluation completed in 0.0062 seconds
+🔍 Sample Fitness Values: [np.float64(-877.0), np.float64(-963.0), -1000000.0, -1000000.0, np.float64(-800.0), np.float64(-1028.0), np.float64(-852.0), np.float64(-866.0), np.float64(-781.0), np.float64(-666.0)]
+🏁 Best Distance: 632.0
+
+
+mpiexec -n 4 python genetic_algorithm_mpi.py
+
+✅ Parallel fitness evaluation completed in 0.0089 seconds
+🔍 Sample Fitness Values: [-1000000.0, np.float64(-1163.0), np.float64(-1030.0), np.float64(-946.0), np.float64(-1089.0), -1000000.0, np.float64(-995.0), np.float64(-887.0), np.float64(-885.0), np.float64(-917.0)]
+🏁 Best Distance: 571.0
+
+✅ Observation: As the number of processes increases, the execution time decreases significantly, demonstrating the effectiveness of parallelism using MPI.
+
+## 🧑‍💻 Author
+
+**Ahmed Hedyed**  
+University of Doha for Science and Technology  
+Course: DSAI3202 – Parallel and Distributed Computing
+
+---
+
+## 📜 License
+
+ License – Free to use, modify, and distribute for academic and learning purposes.
+
+
