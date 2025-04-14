@@ -48,10 +48,9 @@
 import os
 import time
 
-from globals import lock, condition, latest_temperature, temperature_averages, city
+from .globals import lock, condition, latest_temperature, temperature_averages, city
 
 
-city = 'Doha'
 
 def initialize_display():
     """
