@@ -2,7 +2,7 @@ import threading
 import time
 
 
-from globals import temperature_queue, temperature_averages, lock
+from .globals import temperature_queue, temperature_averages, lock
 
 
 MAX_AVERAGE_SIZE = 10  # Store only the last 10 readings

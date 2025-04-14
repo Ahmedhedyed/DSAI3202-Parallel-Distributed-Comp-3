@@ -1,5 +1,5 @@
 
-from globals import latest_temperature, temperature_queue, lock, condition
+from .globals import latest_temperature, temperature_queue, lock, condition
 import random
 import time
 
