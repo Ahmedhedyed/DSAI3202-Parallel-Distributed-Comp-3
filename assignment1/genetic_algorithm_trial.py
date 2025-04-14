@@ -6,7 +6,7 @@ from genetic_algorithms_functions import calculate_fitness, \
 
 
 # Load the distance matrix
-distance_matrix = pd.read_csv('city_distances.csv').to_numpy()
+distance_matrix = pd.read_csv('city_distances_updated.csv').to_numpy()
 
 # Parameters
 num_nodes = distance_matrix.shape[0]

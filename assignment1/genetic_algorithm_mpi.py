@@ -78,6 +78,7 @@ if __name__ == '__main__':
         # For example, load the city distance matrix from CSV.
         distance_matrix = np.loadtxt("city_distances.csv", delimiter=",")
         num_nodes = distance_matrix.shape[0]
+        print(num_nodes)
         # Generate an initial population of candidate routes.
         population = gaf.generate_unique_population(population_size=100, num_nodes=num_nodes)
         # Uncomment the following to test a multi-vehicle extension (e.g., with 2 vehicles).
@@ -90,18 +91,18 @@ if __name__ == '__main__':
         distance_matrix = None
         start_time = None
 
-    # Broadcast the population and the distance matrix to all processes.
-    population = comm.bcast(population, root=0)
-    distance_matrix = comm.bcast(distance_matrix, root=0)
+#     # Broadcast the population and the distance matrix to all processes.
+#     population = comm.bcast(population, root=0)
+#     distance_matrix = comm.bcast(distance_matrix, root=0)
     
-    # Perform parallel fitness evaluation.
-    fitness = parallel_fitness_evaluation(population, distance_matrix)
+#     # Perform parallel fitness evaluation.
+#     fitness = parallel_fitness_evaluation(population, distance_matrix)
     
-    if rank == 0:
-        end_time = time.time()
-        print("Parallel fitness evaluation took:", end_time - start_time, "seconds")
-        print("Fitness values:", fitness)
+#     if rank == 0:
+#         end_time = time.time()
+#         print("Parallel fitness evaluation took:", end_time - start_time, "seconds")
+#         print("Fitness values:", fitness)
 
 
-# I chosen to parallelize fitness evaluation because it is the most compute-intensive and “embarrassingly parallel” portion of the algorithm.
+# # I chosen to parallelize fitness evaluation because it is the most compute-intensive and “embarrassingly parallel” portion of the algorithm.
 
