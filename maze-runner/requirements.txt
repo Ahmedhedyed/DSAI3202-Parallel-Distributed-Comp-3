@@ -2,3 +2,5 @@ pygame
 matplotlib 
 pandas
 numpy
+celery
+pika

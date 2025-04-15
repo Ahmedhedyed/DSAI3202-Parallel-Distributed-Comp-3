@@ -7,6 +7,128 @@ import pygame
 from typing import Tuple, List, Optional, Deque
 from collections import deque
 from .constants import BLUE, WHITE, CELL_SIZE, WINDOW_SIZE
+import heapq
+from typing import Tuple, List
+
+
+# Added AstarExplorer alogorithem class
+class AStarExplorer:
+    def __init__(self, maze, visualize=False):
+        self.maze = maze
+        self.visualize = visualize
+        self.start = maze.start_pos
+        self.goal = maze.end_pos
+        self.path = []
+
+    def heuristic(self, a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])  # Manhattan distance
+
+    def get_neighbors(self, cell):
+        x, y = cell
+        neighbors = []
+        for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
+            nx, ny = x + dx, y + dy
+            if (0 <= nx < self.maze.width and 0 <= ny < self.maze.height and self.maze.grid[ny][nx] == 0):
+                neighbors.append((nx, ny))
+        return neighbors
+
+    def solve(self) -> Tuple[float, List[Tuple[int, int]]]:
+        start_time = time.perf_counter()
+
+        open_set = []
+        heapq.heappush(open_set, (0, self.start))
+        came_from = {}
+        g_score = {self.start: 0}
+        f_score = {self.start: self.heuristic(self.start, self.goal)}
+
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            if current == self.goal:
+                break
+
+            for neighbor in self.get_neighbors(current):
+                tentative_g = g_score[current] + 1
+                if neighbor not in g_score or tentative_g < g_score[neighbor]:
+                    came_from[neighbor] = current
+                    g_score[neighbor] = tentative_g
+                    f_score[neighbor] = tentative_g + self.heuristic(neighbor, self.goal)
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+
+        # Reconstruct path
+        current = self.goal
+        path = [current]
+        while current in came_from:
+            current = came_from[current]
+            path.append(current)
+        path.reverse()
+
+        end_time = time.perf_counter()
+        time_taken = end_time - start_time
+
+        print("\n=== Maze Exploration Statistics (A*) ===")
+        print(f"Total time taken: {time_taken:.2f} seconds")
+        print(f"Total moves made: {len(path)}")
+        print(f"Average moves per second: {len(path)/max(time_taken, 1e-6):.2f}")
+        print("========================================\n")
+
+        return time_taken, self.path
+    
+# Added MemoryExplorer alogorithem class
+
+class MemoryExplorer:
+    def __init__(self, maze, visualize=False):
+        self.maze = maze
+        self.visualize = visualize
+        self.position = maze.start_pos
+        self.start = maze.start_pos
+        self.goal = maze.end_pos
+        self.visited = {}
+        self.path = []
+        self.backtrack_count = 0
+        self.directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # right, down, left, up
+        self.dir_idx = 0
+
+    def move(self, pos):
+        self.position = pos
+        self.path.append(pos)
+        self.visited[pos] = self.visited.get(pos, 0) + 1
+
+    def solve(self) -> Tuple[float, List[Tuple[int, int]]]:
+        start_time = time.perf_counter()
+
+        stack = [self.position]
+        self.visited[self.position] = 1
+        self.path = [self.position]
+
+        while self.position != self.goal:
+            moved = False
+            for i in range(4):
+                direction = self.directions[(self.dir_idx + i) % 4]
+                nx, ny = self.position[0] + direction[0], self.position[1] + direction[1]
+                next_cell = (nx, ny)
+                if (0 <= nx < self.maze.width and 0 <= ny < self.maze.height and
+                        self.maze.grid[ny][nx] == 0 and self.visited.get(next_cell, 0) == 0):
+                    self.dir_idx = (self.dir_idx + i) % 4
+                    stack.append(self.position)
+                    self.move(next_cell)
+                    moved = True
+                    break
+            if not moved and stack:
+                self.backtrack_count += 1
+                self.move(stack.pop())
+
+        end_time = time.perf_counter()
+        time_taken = end_time - start_time
+
+        print("\n=== Maze Exploration Statistics (Memory-Based) ===")
+        print(f"Total time taken: {time_taken:.2f} seconds")
+        print(f"Total moves made: {len(self.path)}")
+        print(f"Backtracks: {self.backtrack_count}")
+        print(f"Average moves per second: {len(self.path)/max(time_taken, 1e-6):.2f}")
+        print("===============================================\n")
+
+        return time_taken, self.path
+
 
 class Explorer:
     def __init__(self, maze, visualize: bool = False):
